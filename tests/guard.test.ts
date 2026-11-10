@@ -35,6 +35,15 @@ describe("guard", () => {
     const r = await guard(benign(), make("silent"));
     expect(r.degraded).toBe(true);
   });
+  test("when tool calling fails to parse, the JSON fallback answers and the floor still applies", async () => {
+    const ok = await guard(benign(), make("toolparse"));
+    expect(ok.via).toBe("json");
+    expect(ok.degraded).toBe(false);
+    expect(ok.verdict).toBe("allow");
+    const bad = await guard(risky(), make("toolparse"));
+    expect(bad.via).toBe("json");
+    expect(bad.verdict).toBe("block");
+  });
   test("a forgetful agent is rescued by the nudge turn", async () => {
     const r = await guard(benign(), make("forgetful"));
     expect(r.degraded).toBe(false);

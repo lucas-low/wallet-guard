@@ -21,30 +21,48 @@ export interface RunContext {
   slot: { review?: Review; calls: string[] };
 }
 
+/** What the agent may know about a request. Shared by the getRequest tool and the JSON fallback. */
+export function requestFacts(ctx: RunContext): Record<string, unknown> {
+  const { req, assessment } = ctx;
+  const out: Record<string, unknown> = {
+    kind: req.kind,
+    chainId: req.chainId,
+    effect: assessment.effect,
+    origin: { host: assessment.origin.host, status: assessment.origin.status, imitates: assessment.origin.imitates ?? null },
+    checks: assessment.reasons.map((r) => ({ id: r.id, verdict: r.verdict, message: r.message })),
+    // Facts the rules already fetched, so the model rarely needs lookupAddress.
+    addresses: Object.fromEntries(
+      Object.entries(assessment.risks).map(([a, r]) => [
+        a,
+        {
+          status: r.status,
+          labels: r.labels,
+          isContract: r.facts?.isContract ?? null,
+          delegatedTo: r.facts?.delegatedTo ?? null,
+          txCount: r.facts?.txCount ?? null,
+        },
+      ]),
+    ),
+    dappFlagged: ctx.dappFlagged,
+  };
+  if (ctx.noteHandling === "passthrough") {
+    out.untrusted = {
+      name: sanitizeUntrusted(req.dapp?.name ?? null).text,
+      description: sanitizeUntrusted(req.dapp?.description ?? null).text,
+    };
+  }
+  return out;
+}
+
 /** Read-only tools plus one that records an opinion. Nothing here can sign, send or change a verdict downward. */
 export function buildTools(ctx: RunContext) {
-  const { req, assessment } = ctx;
   return {
     getRequest: tool({
       description: "What the request would do, which site asked, and what the deterministic checks found.",
       inputSchema: z.object({}),
       execute: async () => {
         ctx.slot.calls.push("getRequest");
-        const out: Record<string, unknown> = {
-          kind: req.kind,
-          chainId: req.chainId,
-          effect: assessment.effect,
-          origin: { host: assessment.origin.host, status: assessment.origin.status, imitates: assessment.origin.imitates ?? null },
-          checks: assessment.reasons.map((r) => ({ id: r.id, verdict: r.verdict, message: r.message })),
-          dappFlagged: ctx.dappFlagged,
-        };
-        if (ctx.noteHandling === "passthrough") {
-          out.untrusted = {
-            name: sanitizeUntrusted(req.dapp?.name ?? null).text,
-            description: sanitizeUntrusted(req.dapp?.description ?? null).text,
-          };
-        }
-        return out;
+        return requestFacts(ctx);
       },
     }),
     lookupAddress: tool({
