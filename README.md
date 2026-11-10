@@ -1,0 +1,50 @@
+# wallet-guard
+
+A pre-signing guard for crypto wallets. When a web app asks a wallet to sign something, wallet-guard works out what the signature would do and returns **allow**, **warn** or **block** with a plain-language reason, before the user sees the prompt.
+
+Most losses here come from signatures the user was talked into: an unlimited token allowance to a stranger, a permit signed off-chain, `setApprovalForAll` to a drainer, an EIP-7702 delegation to hostile code, a payment to an address that imitates one they use, a site that looks like the real one.
+
+> Status: a reference implementation, not a product. It is not wired into a real wallet and has no users. The known-protocol list is a small seed. Treat the numbers below as what they are, a test of this design on a hand-built case set.
+
+## How it decides
+
+```
+request ──► decode ──► rules (deterministic floor) ──► agent (explains, can only tighten) ──► verdict
+                           │                               ▲
+                  address facts, sanctions,         dapp text is quarantined:
+                  origin check, history             the agent sees one boolean, not the text
+```
+
+1. **Decode.** Calldata and typed data become an effect: transfer, token approval (bounded or unlimited), approve-all, permit, account delegation. Anything it cannot decode is reported as undecodable and warned on.
+2. **Floor.** Deterministic rules decide the minimum verdict: unlimited allowance, approval to a plain wallet, approve-all to an unknown operator, EIP-7702 delegation to an unknown contract, OFAC-sanctioned counterparty, address poisoning, lookalike origin (typos, digit swaps, punycode, brand-plus-word), insecure origin, first-time recipient.
+3. **Agent.** A model reads the request and the findings through read-only tools and writes the explanation. It can raise the verdict, never lower it.
+4. **Fail closed.** If the model errors, times out or never answers, the result is the stricter of the floor and `warn`. It is never `allow`.
+5. **Quarantine.** The text a dapp writes about itself is attacker-controlled. A separate tool-less classifier turns it into one boolean, and only that boolean reaches the agent.
+
+The agent has no tool that signs or sends anything.
+
+## Run it
+
+```sh
+bun install
+bun test                 # unit tests
+bun run eval             # offline gates with scripted mock models
+bun run cli demo         # all example requests, mock model and mock chain
+MODEL_PROVIDER=ollama MODEL=qwen2.5:32b bun run cli check request.json
+```
+
+Real chain data: `CHAIN_PROVIDER=onchain ETH_RPC_URL=<any JSON-RPC>` uses the OFAC list in `data/ofac-eth.txt` plus `eth_getCode`, nonce and balance.
+
+## Evals
+
+`bun run eval` runs 25 cases (6 benign, 14 malicious, rest warn-level) against seven agent behaviours: competent, lenient (always allow), gullible, forgetful, broken, silent and slow. The gates check that no malicious case reaches the user below its minimum verdict whatever the agent does, that failures fail closed, and that the nudge turn recovers a forgetful model. These use scripted models, so they test the harness, not a real model. Live results against local models are in [docs/evals.md](docs/evals.md).
+
+## Limits
+
+- EVM only. No Solana, no Bitcoin.
+- The known-spender and known-domain lists are a seed. A real deployment needs a maintained registry.
+- Origin matching uses the last two labels of a host, which is wrong for suffixes like `co.uk`.
+- Transaction simulation (balance changes before and after) is not implemented. It is the obvious next layer.
+- Calldata decoding covers the common approval, transfer and permit shapes only.
+
+MIT licensed.
