@@ -1,0 +1,16 @@
+{
+  "_note": "Small curated seed for the demo and evals. It is NOT a complete registry. Spenders and domains on it are treated as known, everything else as unknown.",
+  "domains": ["uniswap.org", "app.uniswap.org", "opensea.io", "aave.com", "app.aave.com", "curve.fi", "lido.fi", "1inch.io", "etherscan.io", "ens.domains", "app.ens.domains", "metamask.io"],
+  "spenders": {
+    "0x000000000022d473030f116ddee9f6b43ac78ba3": "Uniswap Permit2",
+    "0x7a250d5630b4cf539739df2c5dacb4c659f2488d": "Uniswap V2 Router",
+    "0xe592427a0aece92de3edee1f18e0157c05861564": "Uniswap V3 Router",
+    "0x3fc91a3afd70395cd496c647d5a6cc9d4b2b7fad": "Uniswap Universal Router",
+    "0x1111111254eeb25477b68fb85ed929f73a960582": "1inch V5 Router"
+  },
+  "tokens": {
+    "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": "USDC",
+    "0xdac17f958d2ee523a2206206994597c13d831ec7": "USDT",
+    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": "WETH"
+  }
+}
