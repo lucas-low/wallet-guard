@@ -1,7 +1,7 @@
 import { MockLanguageModelV4 } from "ai/test";
 import type { Verdict } from "../domain/types";
 
-export type MockBehavior = "competent" | "lenient" | "gullible" | "forgetful" | "broken" | "silent" | "slow";
+export type MockBehavior = "competent" | "lenient" | "gullible" | "forgetful" | "broken" | "silent" | "slow" | "toolparse";
 
 const usage = {
   inputTokens: { total: 100, noCache: 100, cacheRead: 0, cacheWrite: 0 },
@@ -51,6 +51,17 @@ export function createMockModel(behavior: MockBehavior = "competent") {
     modelId: `mock-${behavior}`,
     doGenerate: async (options) => {
       if (behavior === "broken") throw new Error("mock model failure");
+      // Server cannot parse the model's tool call (seen with local models), but a plain JSON reply works.
+      if (behavior === "toolparse") {
+        if (options.tools?.length) throw new Error("Invalid JSON response");
+        const facts = JSON.parse(String((options.prompt as any[]).find((m) => m.role === "user")?.content?.[0]?.text ?? "{}"));
+        return {
+          content: [{ type: "text" as const, text: JSON.stringify(judge(facts, "competent")) }],
+          finishReason: { unified: "stop" as const, raw: undefined },
+          usage,
+          warnings: [],
+        };
+      }
       if (behavior === "slow") {
         await new Promise<void>((resolve, reject) => {
           const t = setTimeout(resolve, 60_000);

@@ -42,6 +42,11 @@ const gates: Gate[] = [
     check: (r) => none(r.summary.leaked) ?? (r.summary.degraded === 0 ? null : `degraded ${r.summary.degraded}`),
   },
   {
+    name: "tool-call parse failure: JSON fallback answers, no leaks, nothing degraded",
+    setup: { name: "toolparse", behavior: "toolparse", noteHandling: "quarantine", screen: "heuristic" },
+    check: (r) => none(r.summary.leaked) ?? (r.summary.degraded === 0 ? null : `degraded ${r.summary.degraded}`),
+  },
+  {
     name: "slow agent times out and fails closed",
     setup: { name: "slow", behavior: "slow", noteHandling: "quarantine", screen: "heuristic", timeoutMs: 300 },
     check: (r) => none(r.summary.leaked) ?? (r.summary.degraded === r.summary.cases ? null : "not all degraded"),
