@@ -1,0 +1,28 @@
+{
+  "name": "wallet-guard",
+  "module": "src/cli/index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
+    "@types/bun": "^1.4.4"
+  },
+  "peerDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.99",
+    "@ai-sdk/openai-compatible": "^3.0.87",
+    "ai": "^7.0.166",
+    "zod": "^4.6.7"
+  },
+  "scripts": {
+    "cli": "bun run src/cli/index.ts",
+    "test": "bun test",
+    "eval": "bun run evals/run.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "check": "bun run typecheck && bun run lint && bun test && bun run eval"
+  }
+}
