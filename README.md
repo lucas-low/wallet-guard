@@ -30,6 +30,7 @@ bun install
 bun test                 # unit tests
 bun run eval             # offline gates with scripted mock models
 bun run cli demo         # all example requests, mock model and mock chain
+bun run cli inspect 0x…  # what the chain says about an address: contract, proxy and admin, source verification, sanctions
 MODEL_PROVIDER=ollama MODEL=qwen2.5:32b bun run cli check request.json
 ```
 

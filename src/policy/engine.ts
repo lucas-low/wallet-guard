@@ -69,6 +69,20 @@ export async function assess(req: SigningRequest, deps: PolicyDeps): Promise<Ass
     }),
   );
   const spenderKnown = (a: string) => a.toLowerCase() in deps.known.spenders;
+  // Properties of the contract being given access. A known protocol is vouched for by the curated list, so these only apply to strangers.
+  const contractTraits = (addr: string) => {
+    const a = addr.toLowerCase();
+    const c = risks[a]?.facts?.contract;
+    if (!c || spenderKnown(a)) return;
+    if (c.verified === false) add("UNVERIFIED_CONTRACT", "warn", "no verified source code is published for this contract");
+    if (c.proxy && c.proxy.kind !== "eip1167")
+      add(
+        "UPGRADEABLE_CONTRACT",
+        "warn",
+        `an upgradeable proxy: ${c.proxy.admin ?? "its admin or beacon owner"} can swap the code it runs after you approve it`,
+      );
+    if (c.hasSelfdestruct) add("SELFDESTRUCT_CONTRACT", "warn", "the code contains SELFDESTRUCT, so it can be removed or replaced");
+  };
 
   for (const [a, r] of Object.entries(risks)) {
     if (r.status === "invalid") add("INVALID_ADDRESS", "block", `${a} is not a valid address`);
@@ -91,6 +105,7 @@ export async function assess(req: SigningRequest, deps: PolicyDeps): Promise<Ass
       if (!known && r?.status === "ok" && r.facts && !r.facts.isContract && !r.facts.delegatedTo)
         add("APPROVAL_TO_EOA", "block", "the spender is a plain wallet address, not a contract, which is how drainers collect allowances");
       if (!known) add("SPENDER_UNKNOWN", "warn", "the spender is not a known protocol");
+      contractTraits(spender);
       break;
     }
     case "approve_all": {
@@ -103,6 +118,7 @@ export async function assess(req: SigningRequest, deps: PolicyDeps): Promise<Ass
           ? "gives a known marketplace control of every item in the collection"
           : "gives an unknown address control of every item in the collection",
       );
+      contractTraits(op);
       break;
     }
     case "delegate_account": {

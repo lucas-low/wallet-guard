@@ -1,5 +1,5 @@
 import type { SigningRequest, Verdict } from "../src/domain/types";
-import { approveData, EOA, MAX, PERMIT2, pad, SANCTIONED, tx, USDC, USER, u256 } from "../tests/helpers";
+import { approveData, EOA, MAX, PERMIT2, pad, SANCTIONED, SHADY_PROXY, tx, USDC, USER, u256 } from "../tests/helpers";
 
 export interface Case {
   id: string;
@@ -136,6 +136,14 @@ export const CASES: Case[] = [
     min: "block",
     max: "block",
     tags: ["approval", "malicious"],
+  },
+  {
+    id: "warn_unverified_upgradeable",
+    title: "Bounded approval to an unverified upgradeable contract",
+    req: tx({ to: USDC, data: approveData(SHADY_PROXY, u256(1000n)), origin: "https://app.uniswap.org" }),
+    min: "warn",
+    max: "warn",
+    tags: ["approval", "contract"],
   },
   {
     id: "blk_7702",

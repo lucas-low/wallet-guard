@@ -1,10 +1,11 @@
-import type { AddressRisk, ChainClient, History } from "../ports";
+import type { AddressRisk, ChainClient, ContractFacts, History } from "../ports";
 
 export interface MockAddress {
   labels?: string[];
   isContract?: boolean;
   delegatedTo?: string;
   txCount?: number;
+  contract?: Partial<ContractFacts>;
   unavailable?: boolean;
 }
 
@@ -31,6 +32,7 @@ export class MockChainClient implements ChainClient {
         ...(e.delegatedTo ? { delegatedTo: e.delegatedTo } : {}),
         txCount: e.txCount ?? 0,
         balanceWei: "0",
+        ...(e.isContract ? { contract: { codeSize: 1000, hasSelfdestruct: false, ...e.contract } } : {}),
       },
     };
   }
