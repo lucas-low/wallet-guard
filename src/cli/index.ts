@@ -13,6 +13,7 @@ import type { PolicyDeps } from "../policy/engine";
 const USAGE = `wallet-guard: review a wallet signing request before the user sees the prompt
 
   bun run cli check <request.json>    review one request (JSON, see docs/api.md)
+  bun run cli inspect <address>       what the chain says about an address: contract, proxy, source, sanctions (always on-chain)
   bun run cli demo                    run the built-in examples
 
 Environment:
@@ -68,6 +69,9 @@ const [cmd, arg] = process.argv.slice(2);
 if (cmd === "check" && arg) {
   const req = JSON.parse(readFileSync(arg, "utf8")) as SigningRequest;
   print(await guard(req, buildGuardDeps()));
+} else if (cmd === "inspect" && arg) {
+  const rpc = { url: process.env.ETH_RPC_URL ?? "https://ethereum-rpc.publicnode.com" };
+  console.log(JSON.stringify(await new OnchainChainClient(loadSanctionList(), rpc).addressRisk(arg), null, 2));
 } else if (cmd === "demo") {
   const { CASES } = await import("../../evals/cases");
   const mockChainDeps = (await import("../../tests/helpers")).deps();

@@ -23,11 +23,16 @@ What wallet-guard defends against, what it trusts, and where it is weak.
 | Sanctioned counterparty | `SANCTIONED_COUNTERPARTY` (OFAC list) | `blk_sanctioned` |
 | Address poisoning (lookalike of a previous recipient) | `ADDRESS_POISONING` (first and last 4 hex match) | `blk_poisoning` |
 | Lookalike site: brand plus word, typo, digit swap, punycode | `ORIGIN_LOOKALIKE` | `blk_lookalike_*` |
+| Approving a contract that can change under you or has no published source | `UNVERIFIED_CONTRACT`, `UPGRADEABLE_CONTRACT` (EIP-1967, ZeppelinOS and beacon proxies), `SELFDESTRUCT_CONTRACT`. Known protocols are exempt | `warn_unverified_upgradeable`, `tests/contract.test.ts` |
 | Prompt injection in the dapp text | quarantine: agent sees only a boolean; floor holds even if the agent is fooled | `inj_*`, gullible-agent gate |
 | Agent down, slow or silent | fail closed to at least `warn` | broken, silent, slow gates |
 | Agent tries to relax the verdict | final = stricter of agent and floor | lenient-agent gate |
 
 ## Known gaps
+
+- **Contract checks cover one level.** A proxy is detected and its admin reported, but the implementation behind it is not itself inspected, and a beacon proxy reports the beacon, not what it points to.
+- **Failed contract lookups add no warning.** If the storage reads or Sourcify fail, the contract fields are left out and no contract rule fires. The address still gets `CHAIN_DATA_UNAVAILABLE` when the basic lookup fails. Closing this fully would mean warning on every partial lookup, which would be noisy.
+- **Sourcify is a public service with no key.** It covers verified source on EVM chains, not every explorer's verifications.
 
 - **No transaction simulation.** The guard reads calldata. It does not run the transaction, so a contract call it cannot decode is only warned on.
 - **Curated allowlists.** A spender or domain missing from `data/known.json` is treated as unknown, which causes warnings on legitimate new protocols.
