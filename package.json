@@ -13,6 +13,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.99",
     "@ai-sdk/openai-compatible": "^3.0.87",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "ai": "^7.0.166",
     "zod": "^4.6.7"
   },
@@ -23,6 +24,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "biome check .",
     "format": "biome check --write .",
-    "check": "bun run typecheck && bun run lint && bun test && bun run eval"
+    "check": "bun run typecheck && bun run lint && bun test && bun run eval",
+    "mcp": "bun run src/mcp/server.ts"
   }
 }
