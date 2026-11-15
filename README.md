@@ -6,6 +6,21 @@ Most losses here come from signatures the user was talked into: an unlimited tok
 
 > Status: a reference implementation, not a product. It is not wired into a real wallet and has no users. The known-protocol list is a small seed. Treat the numbers below as what they are, a test of this design on a hand-built case set.
 
+## Use it from an agent (MCP)
+
+An MCP server exposes two read-only tools over stdio, so any MCP client can check a signing request or an address before acting.
+
+| Tool | What it does |
+|---|---|
+| `review_signing_request` | Transaction, EIP-712 typed data or EIP-7702 authorization in, `allow`, `warn` or `block` out, with reasons. Deterministic rules only, no model. |
+| `inspect_address` | Contract or wallet, EIP-7702 delegation, proxy kind and admin, Sourcify verification, SELFDESTRUCT, OFAC sanctions. A failed lookup returns `unavailable`, never a clean result. |
+
+```json
+{ "mcpServers": { "wallet-guard": { "command": "bun", "args": ["run", "/path/to/wallet-guard/src/mcp/server.ts"] } } }
+```
+
+Environment: `ETH_RPC_URL` (default a public RPC), `CHAIN_PROVIDER=mock` for offline use. Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
+
 ## How it decides
 
 ```
