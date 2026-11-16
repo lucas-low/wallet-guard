@@ -19,7 +19,7 @@ An MCP server exposes two read-only tools over stdio, so any MCP client can chec
 { "mcpServers": { "wallet-guard": { "command": "bunx", "args": ["--package", "wallet-guard", "wallet-guard-mcp"] } } }
 ```
 
-Requires [Bun](https://bun.sh). Environment: `ETH_RPC_URL` (default a public RPC), `CHAIN_PROVIDER=mock` for offline use. Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
+Requires [Bun](https://bun.sh). Ethereum mainnet only: a request for another `chainId` is rejected. Environment: `ETH_RPC_URL` (a mainnet endpoint, default a public RPC). Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
 
 ## How it decides
 
