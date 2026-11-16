@@ -21,6 +21,19 @@ An MCP server exposes two read-only tools over stdio, so any MCP client can chec
 
 Requires [Bun](https://bun.sh). Ethereum mainnet only: a request for another `chainId` is rejected. Environment: `ETH_RPC_URL` (a mainnet endpoint, default a public RPC). Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
 
+## Wallet middleware
+
+`guardProvider` wraps any EIP-1193 provider (a browser wallet, a WalletConnect session, a bot's signer) so every signing request passes the policy floor before it reaches the key.
+
+```ts
+import { guardProvider } from "wallet-guard";
+
+const provider = guardProvider(wallet, { chain, history, known, origin: "https://app.uniswap.org" });
+await provider.request({ method: "eth_sendTransaction", params: [tx] }); // throws GuardRejection (code 4001) if blocked
+```
+
+It reviews `eth_sendTransaction`, `eth_signTransaction`, `wallet_sendCalls` (every call in the batch) and `eth_signTypedData_v3/v4`. A `block` verdict is refused. A `warn` is refused unless the `onWarn` callback accepts it. `eth_sign`, legacy `eth_signTypedData`, contract creation and any chain other than mainnet are refused rather than passed through unreviewed. `personal_sign` and read-only methods pass through.
+
 ## How it decides
 
 ```
