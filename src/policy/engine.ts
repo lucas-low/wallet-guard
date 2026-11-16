@@ -97,11 +97,14 @@ export async function assess(req: SigningRequest, deps: PolicyDeps): Promise<Ass
       const spender = effect.spender.toLowerCase();
       const r = risks[spender];
       const known = spenderKnown(spender);
+      // Replayed against real mainnet history, blocking every unknown spender stopped a fifth of normal approvals. A contract with
+      // published source is how legitimate routers look, so it is warned. Unverified contracts and plain wallets stay blocked.
+      const verified = r?.facts?.contract?.verified === true;
       if (effect.unlimited)
         add(
           "UNLIMITED_APPROVAL",
-          known ? "warn" : "block",
-          `unlimited allowance to ${known ? deps.known.spenders[spender] : "an unknown spender"}`,
+          known || verified ? "warn" : "block",
+          `unlimited allowance to ${known ? deps.known.spenders[spender] : verified ? "a verified contract that is not a known protocol" : "an unknown spender"}`,
         );
       if (!known && r?.status === "ok" && r.facts && !r.facts.isContract && !r.facts.delegatedTo)
         add("APPROVAL_TO_EOA", "block", "the spender is a plain wallet address, not a contract, which is how drainers collect allowances");

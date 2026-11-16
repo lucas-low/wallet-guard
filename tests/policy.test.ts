@@ -40,6 +40,27 @@ describe("approvals", () => {
     expect(a.verdict).toBe("block");
     expect(ids(a)).toEqual(expect.arrayContaining(["UNLIMITED_APPROVAL", "APPROVAL_TO_EOA"]));
   });
+  test("unlimited approval to a verified contract that is not known is a warning", async () => {
+    const c = "0x4444444444444444444444444444444444444444";
+    const a = await assess(
+      tx({ data: approveData(c, MAX) }),
+      deps({ [c]: { isContract: true, txCount: 9, contract: { verified: true } } }),
+    );
+    expect(a.verdict).toBe("warn");
+  });
+  test("unlimited approval to an unverified contract is blocked", async () => {
+    const c = "0x4444444444444444444444444444444444444444";
+    const a = await assess(
+      tx({ data: approveData(c, MAX) }),
+      deps({ [c]: { isContract: true, txCount: 9, contract: { verified: false } } }),
+    );
+    expect(a.verdict).toBe("block");
+  });
+  test("unlimited approval is blocked when verification could not be checked", async () => {
+    const c = "0x4444444444444444444444444444444444444444";
+    const a = await assess(tx({ data: approveData(c, MAX) }), deps({ [c]: { isContract: true, txCount: 9, contract: {} } }));
+    expect(a.verdict).toBe("block");
+  });
   test("bounded approval to an unknown contract warns", async () => {
     const c = "0x4444444444444444444444444444444444444444";
     const a = await assess(tx({ data: approveData(c, u256(10n)) }), deps({ [c]: { isContract: true, txCount: 9 } }));
