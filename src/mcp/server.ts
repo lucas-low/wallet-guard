@@ -2,7 +2,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import known from "../../data/known.json";
-import { MockChainClient } from "../adapters/chain.mock";
 import { loadSanctionList, OnchainChainClient } from "../adapters/chain.onchain";
 import type { PolicyDeps } from "../policy/engine";
 import type { ChainClient } from "../ports";
@@ -41,9 +40,6 @@ export function buildServer(chain: ChainClient): McpServer {
 }
 
 if (import.meta.main) {
-  const chain =
-    process.env.CHAIN_PROVIDER === "mock"
-      ? new MockChainClient()
-      : new OnchainChainClient(loadSanctionList(), { url: process.env.ETH_RPC_URL ?? "https://ethereum-rpc.publicnode.com" });
+  const chain = new OnchainChainClient(loadSanctionList(), { url: process.env.ETH_RPC_URL ?? "https://ethereum-rpc.publicnode.com" });
   await buildServer(chain).connect(new StdioServerTransport());
 }
