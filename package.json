@@ -1,8 +1,32 @@
 {
   "name": "wallet-guard",
-  "module": "src/cli/index.ts",
+  "version": "0.1.0",
+  "description": "Pre-signing review for wallet transactions: a deterministic policy floor over decoded calldata, with an optional LLM reviewer. Ships as a CLI and an MCP server.",
+  "license": "MIT",
+  "author": "Lucas Low",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucas-low/wallet-guard.git"
+  },
+  "keywords": [
+    "mcp",
+    "ethereum",
+    "wallet",
+    "security",
+    "transaction-simulation",
+    "ai-agents"
+  ],
   "type": "module",
-  "private": true,
+  "bin": {
+    "wallet-guard": "src/cli/index.ts",
+    "wallet-guard-mcp": "src/mcp/server.ts"
+  },
+  "files": [
+    "src",
+    "data",
+    "LICENSE",
+    "README.md"
+  ],
   "devDependencies": {
     "@biomejs/biome": "^2.6.6",
     "@types/bun": "^1.4.4"

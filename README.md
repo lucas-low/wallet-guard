@@ -16,10 +16,10 @@ An MCP server exposes two read-only tools over stdio, so any MCP client can chec
 | `inspect_address` | Contract or wallet, EIP-7702 delegation, proxy kind and admin, Sourcify verification, SELFDESTRUCT, OFAC sanctions. A failed lookup returns `unavailable`, never a clean result. |
 
 ```json
-{ "mcpServers": { "wallet-guard": { "command": "bun", "args": ["run", "/path/to/wallet-guard/src/mcp/server.ts"] } } }
+{ "mcpServers": { "wallet-guard": { "command": "bunx", "args": ["--package", "wallet-guard", "wallet-guard-mcp"] } } }
 ```
 
-Environment: `ETH_RPC_URL` (default a public RPC), `CHAIN_PROVIDER=mock` for offline use. Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
+Requires [Bun](https://bun.sh). Environment: `ETH_RPC_URL` (default a public RPC), `CHAIN_PROVIDER=mock` for offline use. Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
 
 ## How it decides
 
