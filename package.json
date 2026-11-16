@@ -17,6 +17,9 @@
     "ai-agents"
   ],
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "bin": {
     "wallet-guard": "src/cli/index.ts",
     "wallet-guard-mcp": "src/mcp/server.ts"
