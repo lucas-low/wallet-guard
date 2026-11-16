@@ -64,6 +64,17 @@ MODEL_PROVIDER=ollama MODEL=qwen2.5:32b bun run cli check request.json
 
 Real chain data: `CHAIN_PROVIDER=onchain ETH_RPC_URL=<any JSON-RPC>` uses the OFAC list in `data/ofac-eth.txt` plus `eth_getCode`, nonce and balance.
 
+## Measured on real history
+
+Replayed at the block before each transaction, origin rule off, 2026-11-16:
+
+| Set | Cases | Block | Warn | Allow |
+|---|---|---|---|---|
+| Approvals and permits to labelled scam addresses (162,774 found, 1,200 sampled) | 1,200 | 96.7% | 3.3% | 0% |
+| Approvals from recent normal traffic, labelled spenders excluded | 600 | 17.8% | 72.7% | 9.5% |
+
+Read the second row with care. It has no ground truth: some of those blocks are unlabelled scams or wallet-address spenders, so 17.8% is an upper bound on false alarms, and the 72.7% warnings are mostly spenders outside the 19-entry known list. Scam labels come from public lists, so a scam nobody has labelled is not counted. About 3% of cases could not be looked up. Methods and scripts: `replay/`.
+
 ## Evals
 
 `bun run eval` runs 25 cases (6 benign, 14 malicious, rest warn-level) against seven agent behaviours: competent, lenient (always allow), gullible, forgetful, broken, silent and slow. The gates check that no malicious case reaches the user below its minimum verdict whatever the agent does, that failures fail closed, and that the nudge turn recovers a forgetful model. These use scripted models, so they test the harness, not a real model. Live results against local models are in [docs/evals.md](docs/evals.md).
