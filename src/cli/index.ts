@@ -12,7 +12,7 @@ import type { PolicyDeps } from "../policy/engine";
 
 const USAGE = `wallet-guard: review a wallet signing request before the user sees the prompt
 
-  bun run cli check <request.json>    review one request (JSON, see docs/api.md)
+  bun run cli check <request.json>    review one request (JSON, examples in evals/cases.ts)
   bun run cli inspect <address>       what the chain says about an address: contract, proxy, source, sanctions (always on-chain)
   bun run cli demo                    run the built-in examples
 
