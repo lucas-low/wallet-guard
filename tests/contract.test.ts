@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { OnchainChainClient, readAddressFacts } from "../src/adapters/chain.onchain";
+import { tmpdir } from "node:os";
+import { loadSanctionList, OnchainChainClient, readAddressFacts } from "../src/adapters/chain.onchain";
 import { inspectBytecode } from "../src/guardrails/bytecode";
 import { assess } from "../src/policy/engine";
 import { approveData, deps, PERMIT2, tx, u256 } from "./helpers";
@@ -126,6 +127,18 @@ describe("on-chain contract facts", () => {
     const client = new OnchainChainClient(new Set(), { url: "x", fetch: rpc({ code: "0x6000", impl: IMPL, sourcify: 404 }) });
     const r = await client.addressRisk(SPENDER);
     expect(r.facts?.contract?.proxy?.kind).toBe("eip1967");
+  });
+});
+
+describe("bundled sanction list", () => {
+  test("loads regardless of the working directory", () => {
+    const cwd = process.cwd();
+    process.chdir(tmpdir());
+    try {
+      expect(loadSanctionList().size).toBeGreaterThan(0);
+    } finally {
+      process.chdir(cwd);
+    }
   });
 });
 

@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { inspectBytecode } from "../guardrails/bytecode";
 import type { AddressFacts, AddressRisk, ChainClient, ContractFacts } from "../ports";
 
@@ -14,7 +15,7 @@ export function parseSanctionList(text: string): Set<string> {
   );
 }
 
-export function loadSanctionList(path = "data/ofac-eth.txt"): Set<string> {
+export function loadSanctionList(path = fileURLToPath(new URL("../../data/ofac-eth.txt", import.meta.url))): Set<string> {
   return parseSanctionList(readFileSync(path, "utf8"));
 }
 
