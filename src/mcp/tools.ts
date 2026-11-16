@@ -6,7 +6,7 @@ import type { AddressRisk, ChainClient } from "../ports";
 
 const address = z.string().describe("0x-prefixed 20-byte address");
 const context = {
-  chainId: z.number().int().default(1),
+  chainId: z.literal(1).default(1).describe("Ethereum mainnet only; other chains are rejected rather than judged on mainnet data"),
   from: address.describe("The user's account"),
   origin: z.string().describe("Page URL that made the request, as reported by the browser or wallet"),
   recentRecipients: z.array(address).default([]).describe("Addresses this account has paid before, for address-poisoning checks"),
@@ -16,7 +16,12 @@ const context = {
 export const requestShape = {
   ...context,
   request: z.discriminatedUnion("kind", [
-    z.object({ kind: z.literal("transaction"), to: address, valueWei: z.string().default("0"), data: z.string().default("0x") }),
+    z.object({
+      kind: z.literal("transaction"),
+      to: address,
+      valueWei: z.string().regex(/^\d+$/).default("0"),
+      data: z.string().default("0x"),
+    }),
     z.object({
       kind: z.literal("typedData"),
       primaryType: z.string(),
