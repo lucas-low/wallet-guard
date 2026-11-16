@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import known from "../data/known.json";
 import { assess } from "../src/policy/engine";
 import { approveData, deps, EOA, MAX, PERMIT2, pad, SANCTIONED, tx, USDC, USER, u256 } from "./helpers";
 
@@ -147,5 +148,11 @@ describe("disabling a rule", () => {
     const d = { ...deps(), disabledRules: ["APPROVAL_TO_EOA"] };
     const a = await assess(tx({ data: approveData(EOA, u256(1n)) }), d);
     expect(ids(a)).not.toContain("APPROVAL_TO_EOA");
+  });
+});
+
+describe("known list", () => {
+  test("every address key is lowercase 20-byte hex, so lookups cannot miss on case", () => {
+    for (const a of [...Object.keys(known.spenders), ...Object.keys(known.tokens)]) expect(a).toMatch(/^0x[0-9a-f]{40}$/);
   });
 });
