@@ -74,14 +74,15 @@ export async function assess(req: SigningRequest, deps: PolicyDeps): Promise<Ass
     const a = addr.toLowerCase();
     const c = risks[a]?.facts?.contract;
     if (!c || spenderKnown(a)) return;
-    if (c.verified === false) add("UNVERIFIED_CONTRACT", "warn", "no verified source code is published for this contract");
+    if (c.verified === false) add("UNVERIFIED_CONTRACT", "warn", "Sourcify has no verified source for this contract");
     if (c.proxy && c.proxy.kind !== "eip1167")
       add(
         "UPGRADEABLE_CONTRACT",
         "warn",
         `an upgradeable proxy: ${c.proxy.admin ?? "its admin or beacon owner"} can swap the code it runs after you approve it`,
       );
-    if (c.hasSelfdestruct) add("SELFDESTRUCT_CONTRACT", "warn", "the code contains SELFDESTRUCT, so it can be removed or replaced");
+    if (c.hasSelfdestruct)
+      add("SELFDESTRUCT_CONTRACT", "warn", "the code contains SELFDESTRUCT, which can send out the contract's whole balance when called");
   };
 
   for (const [a, r] of Object.entries(risks)) {
