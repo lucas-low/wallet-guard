@@ -16,7 +16,7 @@ An MCP server exposes two read-only tools over stdio, so any MCP client can chec
 | `inspect_address` | Contract or wallet, EIP-7702 delegation, proxy kind and admin, Sourcify verification, SELFDESTRUCT, OFAC sanctions. A failed lookup returns `unavailable`, never a clean result. |
 
 ```json
-{ "mcpServers": { "wallet-guard": { "command": "bunx", "args": ["--package", "wallet-guard", "wallet-guard-mcp"] } } }
+{ "mcpServers": { "wallet-guard": { "command": "bunx", "args": ["--package", "github:lucas-low/wallet-guard", "wallet-guard-mcp"] } } }
 ```
 
 Requires [Bun](https://bun.sh). Ethereum mainnet only: a request for another `chainId` is rejected. Environment: `ETH_RPC_URL` (a mainnet endpoint, default a public RPC). Dapp-supplied text is not accepted by the schema, so a malicious description cannot reach the output.
